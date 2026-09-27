@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+dist-ssr/
+
+# Environment & secrets
+.env
+*.local
+
+# Logs
+logs/
+*.log
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

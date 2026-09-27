@@ -1,0 +1,30 @@
+{
+  "name": "resume-extractor-backend",
+  "version": "1.0.0",
+  "description": "Backend service that extracts text content from PDF resumes",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "smoke": "node scripts/smoke-test.mjs",
+    "lint": "node --check src/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "multer": "^2.0.1",
+    "pdfjs-dist": "^4.10.38",
+    "pino": "^9.6.0",
+    "pino-http": "^10.3.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
