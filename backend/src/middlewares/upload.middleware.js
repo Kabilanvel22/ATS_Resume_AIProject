@@ -8,7 +8,7 @@ import AppError from '../utils/AppError.js';
  * Two deliberate choices:
  *  1. memoryStorage — the PDF stays in RAM as a Buffer, never touching disk.
  *     The service stays stateless and there's nothing to clean up.
- *  2. limits.fileSize — Multer rejects anything over 5 MB before the handler
+ *  2. limits.fileSize — Multer rejects anything over the configured cap before the handler
  *     runs, so a large upload never reaches the parser.
  *
  * The fileFilter rejects non-PDFs by MIME type up front; the controller

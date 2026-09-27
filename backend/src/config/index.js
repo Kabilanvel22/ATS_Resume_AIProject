@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'node:url';
+
+dotenv.config({ path: fileURLToPath(new URL('../../.env', import.meta.url)) });
+
 /**
  * Central configuration.
  *
@@ -12,9 +17,15 @@ const toInt = (value, fallback) => {
   return Number.isNaN(parsed) ? fallback : parsed;
 };
 
+const defaultMaxFileSizeMb = process.env.VERCEL ? 4 : 5;
+
 const config = {
   env: process.env.NODE_ENV ?? 'development',
   port: toInt(process.env.PORT, 5000),
+  openRouter: {
+    apiKey: process.env.API_KEY ?? '',
+    model: process.env.OPENROUTER_MODEL ?? 'nvidia/nemotron-3-super-120b-a12b:free',
+  },
 
   cors: {
     // Comma-separated list, e.g. "http://localhost:5173,https://myapp.com"
@@ -25,8 +36,8 @@ const config = {
   },
 
   upload: {
-    // Hard business rule: resumes must be PDFs under 5 MB.
-    maxFileSizeMb: toInt(process.env.MAX_FILE_SIZE_MB, 5),
+    // Leave room for multipart overhead under Vercel's 4.5 MB request limit.
+    maxFileSizeMb: toInt(process.env.MAX_FILE_SIZE_MB, defaultMaxFileSizeMb),
     get maxFileSizeBytes() {
       return this.maxFileSizeMb * 1024 * 1024;
     },

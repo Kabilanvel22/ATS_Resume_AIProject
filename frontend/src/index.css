@@ -2,86 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 222 47% 4%;
-    --foreground: 210 40% 98%;
-  }
-
-  body {
-    background-color: #0a0d14;
-    color: #f1f5f9;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  }
+:root {
+  color-scheme: light;
+  font-family: 'DM Sans', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Utilities for High-Class Aesthetics */
-.glass-panel {
-  background: rgba(22, 28, 46, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
 }
 
-.glass-panel-interactive {
-  background: rgba(22, 28, 46, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
 }
 
-.glass-panel-interactive:hover {
-  background: rgba(28, 36, 59, 0.85);
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.2);
-  transform: translateY(-2px);
+button,
+textarea,
+input {
+  font: inherit;
 }
 
-.glass-card-glow {
-  background: linear-gradient(135deg, rgba(30, 27, 75, 0.5) 0%, rgba(15, 20, 34, 0.8) 100%);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-}
-
-.bg-grid-pattern {
-  background-size: 40px 40px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-}
-
-.bg-radial-gradient {
-  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, #ffffff 20%, #a5b4fc 60%, #38bdf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.gradient-emerald-text {
-  background: linear-gradient(135deg, #34d399 0%, #06b6d4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Custom subtle scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #0a0d14;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #26314d;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #4338ca;
+::selection {
+  color: #fff;
+  background: #197353;
 }

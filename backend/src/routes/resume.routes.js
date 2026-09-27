@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { extractResume } from '../controllers/resume.controller.js';
+import { analyzeResume, extractResume } from '../controllers/resume.controller.js';
 import { uploadResume } from '../middlewares/upload.middleware.js';
 import config from '../config/index.js';
 
@@ -25,5 +25,6 @@ const uploadLimiter = rateLimit({
 
 // POST /api/resume/extract  — multipart/form-data, field name: "resume"
 router.post('/extract', uploadLimiter, uploadResume, extractResume);
+router.post('/analyze', uploadLimiter, uploadResume, analyzeResume);
 
 export default router;

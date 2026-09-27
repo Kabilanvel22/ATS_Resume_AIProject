@@ -2,7 +2,8 @@
  * Smoke test: boots the app on a random port and exercises the endpoints
  * without needing the server left running. Run with: npm run smoke
  */
-import { createApp } from '../src/app.js';
+process.env.API_KEY = 'smoke-test-api-key';
+const { createApp } = await import('../src/app.js');
 
 // A minimal valid-enough PDF: correct header, one page of text "Hello Resume".
 // pdf.js needs a real xref table, so we build the bytes with proper offsets.
@@ -63,7 +64,41 @@ const server = app.listen(0, async () => {
   check('extracted text contains sample', body.data?.extracted?.text?.includes('Hello Resume'), true);
   check('extracted email found', body.data?.extracted?.email, 'jane@example.com');
 
-  // 5. Unknown route
+  // 5. Resume and job description analysis using a mocked OpenRouter response.
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_url, options) => {
+    check('OpenRouter API key stays in backend request', options.headers.Authorization, 'Bearer smoke-test-api-key');
+    const requestBody = JSON.parse(options.body);
+    check('selected OpenRouter model is used', requestBody.model, 'nvidia/nemotron-3-super-120b-a12b:free');
+    check('OpenRouter JSON mode enabled', requestBody.response_format?.type, 'json_object');
+    const modelReport = {
+      score: '82/100',
+      keywords: [{ term: 'Node.js', status: 'found' }],
+      suggestions: [{ title: 'Add scale details', reason: 'Clarify request volume.' }],
+    };
+    return new Response(JSON.stringify({
+      choices: [{
+        message: {
+          content: `Analysis complete.\n\`\`\`json\n${JSON.stringify(modelReport)}\n\`\`\``,
+        },
+      }],
+    }), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+
+  const analysisForm = new FormData();
+  analysisForm.append('resume', new Blob([buildSamplePdf()], { type: 'application/pdf' }), 'resume.pdf');
+  analysisForm.append('jobDescription', 'Node.js API engineering experience');
+  const analysisResponse = await originalFetch(`${base}/api/resume/analyze`, { method: 'POST', body: analysisForm });
+  check('POST analyze, valid resume and job description -> 200', analysisResponse.status, 200);
+  const analysisBody = await analysisResponse.json();
+  check('analysis score returned', analysisBody.data?.analysis?.score, 82);
+  check('model status synonym normalized', analysisBody.data?.analysis?.keywords?.[0]?.status, 'matched');
+  check('missing summary receives fallback', Boolean(analysisBody.data?.analysis?.summary), true);
+  check('missing suggestion priority receives fallback', analysisBody.data?.analysis?.suggestions?.[0]?.priority, 'medium');
+  check('analysis suggestions returned', analysisBody.data?.analysis?.suggestions?.length, 1);
+  globalThis.fetch = originalFetch;
+
+  // 6. Unknown route
   const missing = await fetch(`${base}/api/nope`);
   check('GET unknown route -> 404', missing.status, 404);
 

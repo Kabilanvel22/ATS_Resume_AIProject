@@ -1,8 +1,9 @@
 # Resume Extractor — Backend
 
 Express.js service that extracts text content from an uploaded PDF resume.
-Files must be **PDF** and **under 5 MB**; both rules are enforced before any
-parsing happens.
+Files must be **PDF** and under the configured size limit; both rules are
+enforced before parsing. The limit defaults to 5 MB locally and 4 MB on Vercel
+to stay below Vercel Functions' request-payload limit.
 
 ## Architecture
 
@@ -40,7 +41,9 @@ Create a `.env` file (see `.env.example` values):
 | ---------------------- | ----------------------- | -------------------------------- |
 | `PORT`                 | `5000`                  | Port to listen on                |
 | `CORS_ORIGIN`          | `http://localhost:5173` | Allowed frontend origin(s), comma-separated |
-| `MAX_FILE_SIZE_MB`     | `5`                     | Resume size cap                  |
+| `MAX_FILE_SIZE_MB`     | `5` locally, `4` on Vercel | Resume size cap                |
+| `API_KEY`              | empty                   | OpenRouter API key for AI analysis |
+| `OPENROUTER_MODEL`     | `nvidia/nemotron-3-super-120b-a12b:free` | OpenRouter model ID |
 | `RATE_LIMIT_WINDOW_MS` | `60000`                 | Rate-limit window                |
 | `RATE_LIMIT_MAX`       | `20`                    | Max uploads per window per IP    |
 
@@ -82,12 +85,25 @@ curl -F "resume=@/path/to/resume.pdf" http://localhost:5000/api/resume/extract
 | Status | Code                    | Cause                              |
 | ------ | ----------------------- | ---------------------------------- |
 | 400    | `FILE_MISSING`          | No file in the `resume` field      |
-| 413    | `LIMIT_FILE_SIZE`       | File over 5 MB                     |
+| 413    | `LIMIT_FILE_SIZE`       | File over the configured size cap  |
 | 415    | `UNSUPPORTED_FILE_TYPE` | Non-PDF MIME type                  |
 | 415    | `INVALID_PDF`           | Spoofed MIME type (magic bytes)    |
 | 422    | `PDF_PARSE_FAILED`      | Corrupt or password-protected PDF  |
 | 422    | `PDF_NO_TEXT`           | Scanned-image PDF (needs OCR)      |
 | 429    | `RATE_LIMITED`          | Too many uploads                   |
+
+### `POST /api/resume/analyze`
+
+Send `multipart/form-data` with a PDF field named `resume` and a text field
+named `jobDescription`. The backend extracts the PDF text and sends it with the
+job description to the configured OpenRouter model. The response includes an
+evidence-alignment score, summary, strengths, role-signal tags, prioritized
+suggestions with conditional rewrite examples, and an interview angle. The
+score is an AI estimate, not a hiring prediction. Resume text is sent to
+OpenRouter; review its data policy before using sensitive documents.
+
+For Vercel, configure `API_KEY` in the project's environment variables. Do not
+put the key in frontend variables or commit `backend/.env`.
 
 ### `GET /api/health`
 
@@ -110,5 +126,4 @@ const { data } = await res.json();
 
 - Scanned-image PDFs (photos of resumes) carry no text layer; extracting them
   requires OCR (e.g. Tesseract), which is intentionally out of scope.
-- The `resume.service.js` seam is where AI-based field extraction (skills,
-  experience, education) would plug in without touching the HTTP layer.
+- AI comparison runs in `aiAnalysis.service.js`; the API key stays on the backend.
